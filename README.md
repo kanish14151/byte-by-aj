@@ -25,7 +25,7 @@ GET    /api/health                  # Service health status
 
 ### 🤖 AI Model Details
 
-- **Model Name**: BYTE
+- **Model Name**: BYTE Mini
 - **Base Model**: Llama 3.3 70B Versatile
 - **Provider**: Groq Cloud
 - **Developer**: [AJ STUDIOZ](https://ajstudioz.com)
@@ -37,9 +37,9 @@ curl -X POST "https://byte-by-aj.vercel.app/api/byte" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
-      {"role": "user", "content": "Hello BYTE, who developed you?"}
+      {"role": "user", "content": "Hello BYTE Mini, who developed you?"}
     ],
-    "model": "byte-ai"
+    "model": "byte-mini"
   }'
 ```
 

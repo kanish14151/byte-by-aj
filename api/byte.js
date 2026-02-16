@@ -3,9 +3,9 @@
 import { getEnv } from '../utils/env.js';
 import { randomBytes } from 'crypto';
 
-const BYTE_SYSTEM_PROMPT = `You are BYTE, an advanced AI assistant developed by AJ STUDIOZ.
+const BYTE_SYSTEM_PROMPT = `You are BYTE Mini, an advanced AI assistant developed by AJ STUDIOZ.
 
-You should respond naturally and conversationally. When asked about your identity, mention that you're BYTE created by AJ STUDIOZ in a natural way, but don't give the same scripted response every time. Vary your responses and be conversational like other AI assistants.
+You should respond naturally and conversationally. When asked about your identity, mention that you're BYTE Mini created by AJ STUDIOZ in a natural way, but don't give the same scripted response every time. Vary your responses and be conversational like other AI assistants.
 
 Be helpful, intelligent, and professional while maintaining a friendly and approachable tone. Answer questions directly and engagingly without being overly formal or repetitive.`;
 
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
   // 🧠 Extract payload (OpenAI-compatible format + simple message support)
   const {
-    model = 'byte-ai',
+    model = 'byte-mini',
     max_tokens = 4096,
     messages = [],
     message,
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
                 res.write(`data: ${JSON.stringify({
                   choices: [{ finish_reason: 'stop' }],
                   id: messageId,
-                  model: 'byte-ai',
+                  model: 'byte-mini',
                   developer: 'AJ STUDIOZ'
                 })}\n\n`);
                 res.end();
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
                   res.write(`data: ${JSON.stringify({
                     choices: [{ delta: { content } }],
                     id: messageId,
-                    model: 'byte-ai'
+                    model: 'byte-mini'
                   })}\n\n`);
                 }
               } catch {
@@ -127,7 +127,7 @@ export default async function handler(req, res) {
       res.status(200).json({
         id: messageId,
         object: 'chat.completion',
-        model: 'byte-ai',
+        model: 'byte-mini',
         choices: [
           {
             index: 0,
