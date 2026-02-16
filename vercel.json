@@ -14,28 +14,12 @@
       "dest": "/public/aj-logo.jpg"
     },
     {
-      "src": "/api/keys/generate",
-      "dest": "/api/generate-key.js"
-    },
-    {
-      "src": "/api/lynxa",
-      "dest": "/api/lynxa.js"
+      "src": "/api/byte",
+      "dest": "/api/byte.js"
     },
     {
       "src": "/api/health",
       "dest": "/api/health.js"
-    },
-    {
-      "src": "/api/info",
-      "dest": "/api/info.js"
-    },
-    {
-      "src": "/api/keys/revoke",
-      "dest": "/api/revoke-key.js"
-    },
-    {
-      "src": "/api/user/keys",
-      "dest": "/api/user/keys.js"
     }
   ]
 }

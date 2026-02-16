@@ -1,15 +1,11 @@
-// api/lynxa.js - Advanced Lynxa Pro Enterprise API
-// Features: Authentication, Rate Limiting, Usage Tracking, WebSocket Support, Advanced Analytics
+// api/byte.js - Simplified BYTE AI API (Direct Model Talking)
+// Features: Direct Groq API Integration, Streaming Support
 import { getEnv } from '../utils/env.js';
-import getNile from '../utils/nile.js';
 import { randomBytes } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
-import { RateLimiterRedis } from 'rate-limiter-flexible';
-import Joi from 'joi';
 
-const LYNXA_SYSTEM_PROMPT = `You are Lynxa Pro, an advanced AI assistant developed by Nexariq, a sub-brand of AJ STUDIOZ.
+const BYTE_SYSTEM_PROMPT = `You are BYTE, an advanced AI assistant developed by AJ STUDIOZ.
 
-You should respond naturally and conversationally. When asked about your identity, mention that you're Lynxa Pro created by Nexariq (part of AJ STUDIOZ) in a natural way, but don't give the same scripted response every time. Vary your responses and be conversational like other AI assistants.
+You should respond naturally and conversationally. When asked about your identity, mention that you're BYTE created by AJ STUDIOZ in a natural way, but don't give the same scripted response every time. Vary your responses and be conversational like other AI assistants.
 
 Be helpful, intelligent, and professional while maintaining a friendly and approachable tone. Answer questions directly and engagingly without being overly formal or repetitive.`;
 
@@ -18,38 +14,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 🔐 Validate API Key
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'NEXARIQ_API_KEY required: Authorization: Bearer <key>' });
-  }
-
-  const providedKey = authHeader.substring(7);
-  let userData;
-
-  try {
-    const nile = await getNile();
-    const result = await nile.db.query(
-      `SELECT * FROM api_keys WHERE api_key = $1 AND expires > NOW() AND revoked = FALSE`,
-      [providedKey]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({
-        error: 'Invalid, expired, or revoked NEXARIQ_API_KEY',
-        message: 'Generate a key at /api/keys/generate'
-      });
-    }
-
-    userData = result.rows[0];
-  } catch (err) {
-    console.error('API Key verification failed:', err.message);
-    return res.status(500).json({ error: 'Database error during authentication' });
-  }
-
   // 🧠 Extract payload (OpenAI-compatible format + simple message support)
   const {
-    model = 'lynxa-pro',
+    model = 'byte-ai',
     max_tokens = 4096,
     messages = [],
     message,
@@ -79,7 +46,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [
-          { role: 'system', content: LYNXA_SYSTEM_PROMPT },
+          { role: 'system', content: BYTE_SYSTEM_PROMPT },
           ...finalMessages
         ],
         max_tokens,
@@ -91,7 +58,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const error = await response.json();
       console.error('Groq API error:', error);
-      return res.status(500).json({ error: 'Failed to get response from Lynxa Pro', details: error });
+      return res.status(500).json({ error: 'Failed to get response from BYTE', details: error });
     }
 
     // ⚡ STREAMING MODE (OpenAI-compatible SSE)
@@ -117,18 +84,11 @@ export default async function handler(req, res) {
               const data = line.slice(6);
 
               if (data === '[DONE]') {
-                // Final chunk with usage
                 res.write(`data: ${JSON.stringify({
                   choices: [{ finish_reason: 'stop' }],
                   id: messageId,
-                  model: 'lynxa-pro',
-                  usage: {
-                    prompt_tokens: 143, // Replace with upstream data
-                    completion_tokens: 80,
-                    total_tokens: 223,
-                    total_time: 0.154265482
-                  },
-                  developer: 'Nexariq - AJ STUDIOZ'
+                  model: 'byte-ai',
+                  developer: 'AJ STUDIOZ'
                 })}\n\n`);
                 res.end();
                 return;
@@ -142,7 +102,7 @@ export default async function handler(req, res) {
                   res.write(`data: ${JSON.stringify({
                     choices: [{ delta: { content } }],
                     id: messageId,
-                    model: 'lynxa-pro'
+                    model: 'byte-ai'
                   })}\n\n`);
                 }
               } catch {
@@ -164,22 +124,10 @@ export default async function handler(req, res) {
       const messageId = `msg_${randomBytes(16).toString('hex')}`;
       const responseText = data.choices[0].message.content;
 
-      // Log usage per user
-      try {
-        const nile = await getNile();
-        await nile.db.query(
-          `INSERT INTO api_logs (user_email, api_key, input_tokens, output_tokens, created_at)
-           VALUES ($1, $2, $3, $4, NOW())`,
-          [userData.email, providedKey, data.usage?.prompt_tokens || 0, data.usage?.completion_tokens || 0]
-        );
-      } catch (logErr) {
-        console.warn('Usage log failed:', logErr.message);
-      }
-
       res.status(200).json({
         id: messageId,
         object: 'chat.completion',
-        model: 'lynxa-pro',
+        model: 'byte-ai',
         choices: [
           {
             index: 0,
@@ -195,12 +143,11 @@ export default async function handler(req, res) {
           completion_tokens: data.usage?.completion_tokens ?? 0,
           total_tokens: data.usage?.total_tokens ?? 0
         },
-        developer: 'Nexariq - AJ STUDIOZ',
-        user: userData.email
+        developer: 'AJ STUDIOZ'
       });
     }
   } catch (error) {
-    console.error('Unexpected error in Lynxa Pro:', error);
+    console.error('Unexpected error in BYTE:', error);
     res.status(500).json({
       error: {
         type: 'internal_error',
